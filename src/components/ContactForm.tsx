@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { ScrollReveal } from '@/components/animations/ScrollReveal'
+import { submitLead } from '@/lib/submitLead'
 
 const phoneRegex = /^\(\d{2}\)\s\d{4,5}-\d{4}$/
 
@@ -15,7 +16,7 @@ const contactSchema = z.object({
   message:  z.string().optional(),
 })
 
-type ContactSchema = z.infer<typeof contactSchema>
+export type ContactSchema = z.infer<typeof contactSchema>
 
 function applyPhoneMask(value: string): string {
   const digits = value.replace(/\D/g, '').slice(0, 11)
@@ -82,6 +83,7 @@ function EmailIcon() {
 
 export default function ContactForm() {
   const [submitted, setSubmitted] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const {
     register,
@@ -98,9 +100,14 @@ export default function ContactForm() {
 
   const selectedProducts = watch('products')
 
-  async function onSubmit(_data: ContactSchema) {
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    setSubmitted(true)
+  async function onSubmit(data: ContactSchema) {
+    try {
+      setSubmitError(null)
+      await submitLead(data)
+      setSubmitted(true)
+    } catch {
+      setSubmitError('Erro ao enviar. Tente novamente ou entre em contato pelo WhatsApp.')
+    }
   }
 
   return (
@@ -177,6 +184,12 @@ export default function ContactForm() {
                     className="input-base resize-none"
                   />
                 </FormField>
+
+                {submitError && (
+                  <p className="text-red-400 text-sm border border-red-400/30 bg-red-400/5 rounded-xl px-4 py-3">
+                    {submitError}
+                  </p>
+                )}
 
                 <button
                   type="submit"
