@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-black text-white font-sans;
+    overflow-x: hidden;
+  }
+
+  h1 { @apply font-black; }
+  h2, h3 { @apply font-bold; }
+  p, span, li { @apply font-normal; }
+  label { @apply font-light tracking-wide; }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #000; }
+  ::-webkit-scrollbar-thumb { background: rgba(204,0,255,0.3); border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(204,0,255,0.6); }
+}
+
+@layer components {
+  .neon-border {
+    @apply border border-[rgba(204,0,255,0.3)] shadow-neon;
+  }
+
+  .section-padding {
+    @apply px-4 py-24 md:px-8 lg:px-16 xl:px-24;
+  }
+
+  .container-max {
+    @apply max-w-7xl mx-auto w-full;
+  }
+
+  .bg-concentric {
+    background-image: repeating-radial-gradient(
+      circle at 50% 50%,
+      transparent,
+      transparent 80px,
+      rgba(204, 0, 255, 0.025) 81px,
+      rgba(204, 0, 255, 0.025) 82px
+    );
+  }
+
+  .input-base {
+    @apply w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3
+           text-white placeholder:text-white/30 outline-none
+           focus:border-[rgba(204,0,255,0.6)] focus:shadow-neon-sm
+           transition-all duration-200 font-sans;
+  }
+}
