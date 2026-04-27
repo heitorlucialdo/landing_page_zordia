@@ -31,10 +31,14 @@ const config: Config = {
         'gradient-purple': 'linear-gradient(to bottom, #270036, #000000)',
       },
       animation: {
-        'bounce-slow': 'bounce 2s ease-in-out infinite',
-        'pulse-neon':  'pulseNeon 2s ease-in-out infinite',
-        blink:         'blink 1s step-end infinite',
-        spin:          'spin 1s linear infinite',
+        'bounce-slow':  'bounce 2s ease-in-out infinite',
+        'pulse-neon':   'pulseNeon 2s ease-in-out infinite',
+        blink:          'blink 1s step-end infinite',
+        spin:           'spin 1s linear infinite',
+        'border-spin':  'border-spin 3s linear infinite',
+        marquee:        'marquee 28s linear infinite',
+        sonar:          'sonar 2s ease-out infinite',
+        'sonar-delay':  'sonar 2s ease-out 1s infinite',
       },
       keyframes: {
         pulseNeon: {
@@ -44,6 +48,18 @@ const config: Config = {
         blink: {
           '0%, 100%': { opacity: '1' },
           '50%':      { opacity: '0' },
+        },
+        'border-spin': {
+          '0%':   { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        },
+        marquee: {
+          '0%':   { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
+        sonar: {
+          '0%':   { transform: 'scale(1)',   opacity: '0.6' },
+          '100%': { transform: 'scale(2.2)', opacity: '0' },
         },
       },
     },

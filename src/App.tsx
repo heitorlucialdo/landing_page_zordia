@@ -2,9 +2,13 @@ import { lazy, Suspense } from 'react'
 import Navbar from '@/components/Navbar'
 import Hero from '@/components/Hero'
 import Footer from '@/components/Footer'
+import WhatsAppButton from '@/components/WhatsAppButton'
 
 const About = lazy(() => import('@/components/About'))
+const HowItWorks = lazy(() => import('@/components/HowItWorks'))
 const Products = lazy(() => import('@/components/Products'))
+const SocialProof = lazy(() => import('@/components/SocialProof'))
+const FAQ = lazy(() => import('@/components/FAQ'))
 const ContactForm = lazy(() => import('@/components/ContactForm'))
 
 function SectionSkeleton() {
@@ -25,12 +29,22 @@ export default function App() {
           <About />
         </Suspense>
         <Suspense fallback={<SectionSkeleton />}>
+          <HowItWorks />
+        </Suspense>
+        <Suspense fallback={<SectionSkeleton />}>
           <Products />
+        </Suspense>
+        <Suspense fallback={<SectionSkeleton />}>
+          <SocialProof />
+        </Suspense>
+        <Suspense fallback={<SectionSkeleton />}>
+          <FAQ />
         </Suspense>
         <Suspense fallback={<SectionSkeleton />}>
           <ContactForm />
         </Suspense>
       </main>
+      <WhatsAppButton />
       <Footer />
     </div>
   )

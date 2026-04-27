@@ -7,22 +7,25 @@ const PRODUCTS: Product[] = [
     id: 'whatsapp-agent',
     title: 'Agente IA WhatsApp',
     description: 'Agente de inteligência artificial integrado ao WhatsApp que atende clientes automaticamente 24/7. Responde dúvidas, qualifica leads e agenda reuniões sem intervenção humana.',
-    price: 'R$ 1.989,00',
+    price: 'Sob consulta',
+    cta: 'Entrar em contato',
     icon: 'whatsapp',
   },
   {
     id: 'sdr-complete',
     title: 'Agente SDR WhatsApp + LP + CRM',
     description: 'Solução completa de prospecção: agente SDR no WhatsApp integrado a uma Landing Page de captura e um CRM para gestão do pipeline. Do lead ao contato qualificado, automatizado.',
-    price: 'R$ 4.890,00',
+    price: 'Sob consulta',
     badge: 'Popular',
+    cta: 'Entrar em contato',
     icon: 'sdr',
   },
   {
     id: 'sdr-calls',
-    title: 'Agente SDR Ligações',
-    description: 'Agente de voz que realiza ligações ativas de prospecção, qualifica prospects em tempo real por voz e encaminha os leads quentes para o seu time de vendas. Escala humana, custo de sistema.',
-    price: 'R$ 8.597,00',
+    title: 'Agente SDR WhatsApp + IA de Ligação',
+    description: 'Combo completo de prospecção multicanal: agente SDR no WhatsApp que aborda e qualifica leads por mensagem, integrado à IA de Ligação que realiza chamadas ativas em voz. Do primeiro contato à reunião marcada, 100% automatizado.',
+    price: 'Sob consulta',
+    cta: 'Entrar em contato',
     icon: 'calls',
   },
   {
@@ -38,14 +41,16 @@ const PRODUCTS: Product[] = [
     id: 'landing-page',
     title: 'Landing Page',
     description: 'Landing page de alta conversão com React + TypeScript, otimizada para SEO e performance. Design alinhado à identidade da marca, pronta para capturar e converter visitantes em leads.',
-    price: 'R$ 1.249,00',
+    price: 'R$ 1.000,00',
+    cta: 'Quero este',
     icon: 'landing',
   },
   {
     id: 'institutional-site',
     title: 'Site Institucional',
     description: 'Site institucional completo, responsivo e veloz. Apresenta sua empresa com credibilidade, otimizado para mecanismos de busca e integrado às ferramentas de marketing digital.',
-    price: 'R$ 1.689,00',
+    price: 'R$ 1.500,00',
+    cta: 'Quero este',
     icon: 'site',
   },
 ]
@@ -157,7 +162,8 @@ export default function Products() {
                 {product.cta && (
                   <a
                     href="#contato"
-                    className="text-sm font-bold text-brand-neon border border-brand-neon/40 px-4 py-1.5 rounded-full
+                    onClick={() => sessionStorage.setItem('selectedProduct', product.id)}
+                    className="text-sm font-bold text-brand-neon border border-brand-neon/40 px-5 py-2.5 rounded-full
                                hover:bg-brand-neon hover:text-black transition-all duration-300"
                   >
                     {product.cta}

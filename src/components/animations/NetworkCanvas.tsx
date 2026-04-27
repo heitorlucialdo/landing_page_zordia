@@ -1,13 +1,16 @@
 import { useEffect, useRef } from 'react'
 import type { Particle } from '@/types'
 
-const PARTICLE_COUNT = 100
-const MAX_DISTANCE   = 150
-const REPEL_RADIUS   = 100
-const REPEL_STRENGTH = 0.3
+const MAX_DISTANCE     = 150
+const REPEL_RADIUS     = 80
+const REPEL_STRENGTH   = 0.5
+const ATTRACT_START    = 200
+const ATTRACT_RADIUS   = 280
+const ATTRACT_STRENGTH = 0.08
+const GLOW_RADIUS      = 200
 
-function initParticles(w: number, h: number): Particle[] {
-  return Array.from({ length: PARTICLE_COUNT }, () => ({
+function initParticles(w: number, h: number, count: number): Particle[] {
+  return Array.from({ length: count }, () => ({
     x:       Math.random() * w,
     y:       Math.random() * h,
     vx:      (Math.random() - 0.5) * 0.5,
@@ -29,6 +32,8 @@ export default function NetworkCanvas() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
+    const isMobile = window.innerWidth < 768
+    const count = isMobile ? 40 : 100
     const dpr = window.devicePixelRatio || 1
 
     function setSize() {
@@ -37,7 +42,7 @@ export default function NetworkCanvas() {
       canvas.width  = rect.width  * dpr
       canvas.height = rect.height * dpr
       ctx.scale(dpr, dpr)
-      particlesRef.current = initParticles(rect.width, rect.height)
+      particlesRef.current = initParticles(rect.width, rect.height, count)
     }
 
     function draw() {
@@ -55,13 +60,21 @@ export default function NetworkCanvas() {
         const p = particles[i]
         if (!p) continue
 
-        const dx = p.x - mouse.x
-        const dy = p.y - mouse.y
+        const dx   = p.x - mouse.x
+        const dy   = p.y - mouse.y
         const dist = Math.sqrt(dx * dx + dy * dy)
-        if (dist < REPEL_RADIUS && dist > 0) {
-          const force = ((REPEL_RADIUS - dist) / REPEL_RADIUS) * REPEL_STRENGTH
-          p.vx += (dx / dist) * force
-          p.vy += (dy / dist) * force
+
+        if (dist > 0) {
+          if (dist < REPEL_RADIUS) {
+            const force = ((REPEL_RADIUS - dist) / REPEL_RADIUS) * REPEL_STRENGTH
+            p.vx += (dx / dist) * force
+            p.vy += (dy / dist) * force
+          } else if (dist > ATTRACT_START && dist < ATTRACT_RADIUS) {
+            const t     = (dist - ATTRACT_START) / (ATTRACT_RADIUS - ATTRACT_START)
+            const force = (1 - t) * ATTRACT_STRENGTH
+            p.vx -= (dx / dist) * force
+            p.vy -= (dy / dist) * force
+          }
         }
 
         p.vx *= 0.99
@@ -74,16 +87,25 @@ export default function NetworkCanvas() {
         if (p.y < 0)  p.y = h
         if (p.y > h)  p.y = 0
 
+        let drawRadius  = p.radius
+        let drawOpacity = p.opacity
+
+        if (dist < GLOW_RADIUS && dist > 0) {
+          const glow  = 1 - dist / GLOW_RADIUS
+          drawRadius  = p.radius * (1 + glow * 1.5)
+          drawOpacity = p.opacity + glow * (1 - p.opacity)
+        }
+
         ctx.beginPath()
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(255,255,255,${p.opacity})`
+        ctx.arc(p.x, p.y, drawRadius, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(255,255,255,${drawOpacity})`
         ctx.fill()
 
         for (let j = i + 1; j < particles.length; j++) {
           const q = particles[j]
           if (!q) continue
-          const ldx  = p.x - q.x
-          const ldy  = p.y - q.y
+          const ldx   = p.x - q.x
+          const ldy   = p.y - q.y
           const ldist = Math.sqrt(ldx * ldx + ldy * ldy)
           if (ldist < MAX_DISTANCE) {
             const alpha = (1 - ldist / MAX_DISTANCE) * 0.6
@@ -116,14 +138,18 @@ export default function NetworkCanvas() {
     setSize()
     draw()
 
-    canvas.addEventListener('mousemove', handleMouseMove)
-    canvas.addEventListener('mouseleave', handleMouseLeave)
+    if (!isMobile) {
+      canvas.addEventListener('mousemove', handleMouseMove)
+      canvas.addEventListener('mouseleave', handleMouseLeave)
+    }
 
     return () => {
       cancelAnimationFrame(animationIdRef.current)
       resizeObserver.disconnect()
-      canvas.removeEventListener('mousemove', handleMouseMove)
-      canvas.removeEventListener('mouseleave', handleMouseLeave)
+      if (!isMobile) {
+        canvas.removeEventListener('mousemove', handleMouseMove)
+        canvas.removeEventListener('mouseleave', handleMouseLeave)
+      }
     }
   }, [])
 

@@ -65,15 +65,15 @@ export default function Hero() {
             >
               <a
                 href="#produtos"
-                className="px-7 py-3.5 bg-brand-neon text-black font-bold rounded-full
-                           hover:shadow-neon-lg transition-all duration-300 text-sm"
+                className="px-9 py-4 bg-brand-neon text-black font-bold rounded-full
+                           hover:shadow-neon-lg transition-all duration-300 text-base"
               >
                 Ver nossos produtos
               </a>
               <a
                 href="#contato"
-                className="px-7 py-3.5 border border-white/30 text-white font-bold rounded-full
-                           hover:border-white hover:bg-white/5 transition-all duration-300 text-sm"
+                className="px-9 py-4 border border-white/30 text-white font-bold rounded-full
+                           hover:border-white hover:bg-white/5 transition-all duration-300 text-base"
               >
                 Falar com a equipe
               </a>

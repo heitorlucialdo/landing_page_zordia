@@ -20,8 +20,8 @@ export async function submitLead(data: ContactSchema): Promise<void> {
   if (webhookUrl) {
     try {
       await fetch(webhookUrl, {
-        method: 'POST',
-        mode:   'no-cors',
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name:      data.name,
           email:     data.email,

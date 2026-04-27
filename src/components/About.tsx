@@ -57,20 +57,18 @@ export default function About() {
       />
 
       <div className="container-max relative">
-        <ScrollReveal>
-          <span className="inline-block text-xs font-bold text-brand-neon tracking-widest uppercase
-                           border border-brand-neon/30 px-3 py-1.5 rounded-full mb-4">
-            Quem somos
-          </span>
-          <h2 className="text-3xl md:text-5xl font-black leading-tight max-w-2xl">
-            Tecnologia que trabalha{' '}
-            <span className="text-brand-neon">enquanto você descansa</span>
-          </h2>
-        </ScrollReveal>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mt-16">
-          <ScrollReveal delay={0.1}>
-            <p className="text-white/70 text-lg leading-relaxed">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+          {/* Coluna esquerda: badge + título + parágrafo */}
+          <ScrollReveal>
+            <span className="inline-block text-xs font-bold text-brand-neon tracking-widest uppercase
+                             border border-brand-neon/30 px-3 py-1.5 rounded-full mb-4">
+              Quem somos
+            </span>
+            <h2 className="text-3xl md:text-5xl font-black leading-tight">
+              Tecnologia que trabalha{' '}
+              <span className="text-brand-neon">enquanto você descansa</span>
+            </h2>
+            <p className="text-white/70 text-lg leading-relaxed mt-8">
               A ZordIA é uma empresa de tecnologia especializada em automação inteligente
               de processos. Transformamos operações manuais em sistemas eficientes,
               escaláveis e previsíveis. Ao integrar automação, dados e inteligência
@@ -80,6 +78,7 @@ export default function About() {
             </p>
           </ScrollReveal>
 
+          {/* Coluna direita: Missão + Visão alinhados com o título */}
           <div className="flex flex-col gap-6">
             <ScrollReveal delay={0.15}>
               <div className="neon-border rounded-2xl p-8"

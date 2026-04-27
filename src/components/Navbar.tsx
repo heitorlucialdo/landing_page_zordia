@@ -3,10 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 import type { NavLink } from '@/types'
 
 const NAV_LINKS: NavLink[] = [
-  { label: 'Início',         href: '#inicio'   },
-  { label: 'Sobre Nós',      href: '#sobre'    },
-  { label: 'Nossos Produtos', href: '#produtos' },
-  { label: 'Contato',        href: '#contato'  },
+  { label: 'Início',          href: '#inicio'   },
+  { label: 'Sobre Nós',       href: '#sobre'    },
+  { label: 'Nossos Produtos',  href: '#produtos' },
+  { label: 'Contato',         href: '#contato'  },
 ]
 
 export default function Navbar() {
@@ -20,70 +20,75 @@ export default function Navbar() {
   }, [])
 
   useEffect(() => {
-    if (menuOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
+    document.body.style.overflow = menuOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [menuOpen])
 
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled
-            ? 'bg-black/80 backdrop-blur-md border-b border-white/10'
-            : 'bg-transparent'
-        }`}
+        className="fixed z-50 flex items-center justify-between transition-all duration-300"
+        style={{
+          top: '16px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: 'calc(100% - 32px)',
+          maxWidth: '800px',
+          borderRadius: '9999px',
+          padding: '10px 24px',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          background: scrolled ? 'rgba(0,0,0,0.85)' : 'rgba(0,0,0,0.5)',
+          border: `1px solid rgba(204,0,255,${scrolled ? 0.4 : 0.15})`,
+          boxShadow: scrolled
+            ? '0 0 40px rgba(204,0,255,0.2), 0 8px 32px rgba(0,0,0,0.4)'
+            : '0 0 30px rgba(204,0,255,0.1)',
+        }}
       >
-        <div className="container-max section-padding !py-0 flex items-center justify-between h-16 md:h-20">
-          <a href="#inicio" className="flex items-center">
-            <span className="font-black text-2xl tracking-tight">
-              Zord<span className="text-brand-neon">IA</span>
-            </span>
-          </a>
+        {/* Logo */}
+        <a href="#inicio" className="flex items-center flex-shrink-0">
+          <span className="font-black text-xl tracking-tight">
+            Zord<span className="text-brand-neon">IA</span>
+          </span>
+        </a>
 
-          <div className="hidden md:flex items-center gap-8">
-            {NAV_LINKS.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="text-sm text-white/70 hover:text-white transition-colors duration-200 font-normal"
-              >
-                {link.label}
-              </a>
-            ))}
-          </div>
-
-          <div className="hidden md:flex items-center">
+        {/* Links — desktop */}
+        <div className="hidden md:flex items-center gap-6">
+          {NAV_LINKS.map((link) => (
             <a
-              href="#contato"
-              className="text-sm font-bold px-5 py-2 rounded-full border border-brand-neon text-brand-neon
-                         hover:bg-brand-neon hover:text-black transition-all duration-300 hover:shadow-neon"
+              key={link.href}
+              href={link.href}
+              className="text-sm text-white/70 hover:text-white transition-colors duration-200 font-normal whitespace-nowrap"
             >
-              Falar com a equipe
+              {link.label}
             </a>
-          </div>
-
-          <button
-            className="md:hidden flex flex-col justify-center items-center w-10 h-10 gap-1.5"
-            onClick={() => setMenuOpen((o) => !o)}
-            aria-label="Menu"
-          >
-            <span
-              className={`block w-6 h-0.5 bg-white transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-2' : ''}`}
-            />
-            <span
-              className={`block w-6 h-0.5 bg-white transition-all duration-300 ${menuOpen ? 'opacity-0' : ''}`}
-            />
-            <span
-              className={`block w-6 h-0.5 bg-white transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`}
-            />
-          </button>
+          ))}
         </div>
+
+        {/* CTA — desktop */}
+        <div className="hidden md:flex items-center flex-shrink-0">
+          <a
+            href="#contato"
+            className="text-sm font-bold px-6 py-2.5 rounded-full border border-brand-neon text-brand-neon
+                       hover:bg-brand-neon hover:text-black transition-all duration-300 hover:shadow-neon whitespace-nowrap"
+          >
+            Falar com a equipe
+          </a>
+        </div>
+
+        {/* Hamburger — mobile */}
+        <button
+          className="md:hidden flex flex-col justify-center items-center w-9 h-9 gap-1.5 flex-shrink-0"
+          onClick={() => setMenuOpen((o) => !o)}
+          aria-label="Menu"
+        >
+          <span className={`block w-5 h-0.5 bg-white transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-2' : ''}`} />
+          <span className={`block w-5 h-0.5 bg-white transition-all duration-300 ${menuOpen ? 'opacity-0' : ''}`} />
+          <span className={`block w-5 h-0.5 bg-white transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+        </button>
       </nav>
 
+      {/* Drawer mobile */}
       <AnimatePresence>
         {menuOpen && (
           <>
@@ -108,8 +113,7 @@ export default function Navbar() {
                   <a
                     key={link.href}
                     href={link.href}
-                    className="text-lg text-white/80 hover:text-white hover:text-brand-neon
-                               transition-colors duration-200"
+                    className="text-lg text-white/80 hover:text-brand-neon transition-colors duration-200"
                     onClick={() => setMenuOpen(false)}
                   >
                     {link.label}
@@ -118,7 +122,7 @@ export default function Navbar() {
               </nav>
               <a
                 href="#contato"
-                className="mt-8 text-center font-bold px-5 py-3 rounded-full border border-brand-neon
+                className="mt-8 text-center font-bold px-7 py-4 rounded-full border border-brand-neon
                            text-brand-neon hover:bg-brand-neon hover:text-black transition-all duration-300"
                 onClick={() => setMenuOpen(false)}
               >

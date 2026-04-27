@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useState, useEffect, type ReactNode } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -48,7 +48,7 @@ function FormField({ label, error, children, required }: FormFieldProps) {
 const PRODUCT_OPTIONS = [
   { value: 'whatsapp-agent',       label: 'Agente IA WhatsApp'           },
   { value: 'sdr-complete',         label: 'Agente SDR + LP + CRM'        },
-  { value: 'sdr-calls',            label: 'Agente SDR Ligações'           },
+  { value: 'sdr-calls',            label: 'Agente SDR WhatsApp + IA de Ligação' },
   { value: 'automation-enterprise', label: 'Automação para Empresa'       },
   { value: 'landing-page',         label: 'Landing Page'                  },
   { value: 'institutional-site',   label: 'Site Institucional'            },
@@ -99,6 +99,14 @@ export default function ContactForm() {
   })
 
   const selectedProducts = watch('products')
+
+  useEffect(() => {
+    const preselected = sessionStorage.getItem('selectedProduct')
+    if (preselected) {
+      setValue('products', [preselected])
+      sessionStorage.removeItem('selectedProduct')
+    }
+  }, [setValue])
 
   async function onSubmit(data: ContactSchema) {
     try {
@@ -194,8 +202,8 @@ export default function ContactForm() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-4 bg-brand-neon text-black font-black rounded-xl
-                             hover:shadow-neon-lg transition-all duration-300 text-sm tracking-wide
+                  className="w-full py-5 bg-brand-neon text-black font-black rounded-xl
+                             hover:shadow-neon-lg transition-all duration-300 text-base tracking-wide
                              disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? (
@@ -249,15 +257,6 @@ export default function ContactForm() {
                 </div>
               </FormField>
 
-              <FormField label="Mensagem adicional (opcional)" error={errors.message?.message}>
-                <textarea
-                  {...register('message')}
-                  rows={4}
-                  placeholder="Informações adicionais, prazo, orçamento..."
-                  className="input-base resize-none"
-                />
-              </FormField>
-
               <div
                 className="rounded-2xl p-6 border border-white/10 flex flex-col gap-4"
                 style={{ background: 'rgba(255,255,255,0.02)' }}
@@ -273,13 +272,13 @@ export default function ContactForm() {
                   <span className="text-sm">@ia.zord</span>
                 </a>
                 <a
-                  href="https://wa.me/5565996490705"
+                  href="https://wa.me/5565993383474"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 text-white/70 hover:text-brand-neon transition-colors duration-200 w-fit"
                 >
                   <WhatsAppIcon />
-                  <span className="text-sm">(65) 99649-0705</span>
+                  <span className="text-sm">(65) 99338-3474</span>
                 </a>
                 <a
                   href="mailto:zord.ia20@gmail.com"
