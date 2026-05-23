@@ -199,6 +199,44 @@ export default function ContactForm() {
                   </p>
                 )}
 
+                <div className="lg:hidden">
+                  <FormField label="Produtos de interesse" error={errors.products?.message} required>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
+                      {PRODUCT_OPTIONS.map((opt) => {
+                        const checked = selectedProducts.includes(opt.value)
+                        return (
+                          <label
+                            key={opt.value}
+                            className={`flex items-center gap-3 cursor-pointer p-3 rounded-xl border transition-all duration-200
+                              ${checked
+                                ? 'border-brand-neon/60 bg-brand-neon/5'
+                                : 'border-white/10 hover:border-white/20'
+                              }`}
+                          >
+                            <input
+                              type="checkbox"
+                              value={opt.value}
+                              {...register('products')}
+                              className="sr-only"
+                            />
+                            <span
+                              className={`flex-shrink-0 w-4 h-4 rounded border transition-all duration-200 flex items-center justify-center
+                                ${checked ? 'bg-brand-neon border-brand-neon' : 'border-white/30'}`}
+                            >
+                              {checked && (
+                                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                                  <polyline points="1.5 5 4 7.5 8.5 2.5" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              )}
+                            </span>
+                            <span className="text-sm text-white/80">{opt.label}</span>
+                          </label>
+                        )
+                      })}
+                    </div>
+                  </FormField>
+                </div>
+
                 <button
                   type="submit"
                   disabled={isSubmitting}
@@ -221,41 +259,43 @@ export default function ContactForm() {
 
           <ScrollReveal delay={0.2}>
             <div className="flex flex-col gap-8">
-              <FormField label="Produtos de interesse" error={errors.products?.message} required>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
-                  {PRODUCT_OPTIONS.map((opt) => {
-                    const checked = selectedProducts.includes(opt.value)
-                    return (
-                      <label
-                        key={opt.value}
-                        className={`flex items-center gap-3 cursor-pointer p-3 rounded-xl border transition-all duration-200
-                          ${checked
-                            ? 'border-brand-neon/60 bg-brand-neon/5'
-                            : 'border-white/10 hover:border-white/20'
-                          }`}
-                      >
-                        <input
-                          type="checkbox"
-                          value={opt.value}
-                          {...register('products')}
-                          className="sr-only"
-                        />
-                        <span
-                          className={`flex-shrink-0 w-4 h-4 rounded border transition-all duration-200 flex items-center justify-center
-                            ${checked ? 'bg-brand-neon border-brand-neon' : 'border-white/30'}`}
+              <div className="hidden lg:block">
+                <FormField label="Produtos de interesse" error={errors.products?.message} required>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
+                    {PRODUCT_OPTIONS.map((opt) => {
+                      const checked = selectedProducts.includes(opt.value)
+                      return (
+                        <label
+                          key={opt.value}
+                          className={`flex items-center gap-3 cursor-pointer p-3 rounded-xl border transition-all duration-200
+                            ${checked
+                              ? 'border-brand-neon/60 bg-brand-neon/5'
+                              : 'border-white/10 hover:border-white/20'
+                            }`}
                         >
-                          {checked && (
-                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                              <polyline points="1.5 5 4 7.5 8.5 2.5" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          )}
-                        </span>
-                        <span className="text-sm text-white/80">{opt.label}</span>
-                      </label>
-                    )
-                  })}
-                </div>
-              </FormField>
+                          <input
+                            type="checkbox"
+                            value={opt.value}
+                            {...register('products')}
+                            className="sr-only"
+                          />
+                          <span
+                            className={`flex-shrink-0 w-4 h-4 rounded border transition-all duration-200 flex items-center justify-center
+                              ${checked ? 'bg-brand-neon border-brand-neon' : 'border-white/30'}`}
+                          >
+                            {checked && (
+                              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                                <polyline points="1.5 5 4 7.5 8.5 2.5" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            )}
+                          </span>
+                          <span className="text-sm text-white/80">{opt.label}</span>
+                        </label>
+                      )
+                    })}
+                  </div>
+                </FormField>
+              </div>
 
               <div
                 className="rounded-2xl p-6 border border-white/10 flex flex-col gap-4"
