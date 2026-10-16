@@ -5,42 +5,35 @@ import Footer from '@/components/Footer'
 import WhatsAppButton from '@/components/WhatsAppButton'
 
 const About = lazy(() => import('@/components/About'))
-const HowItWorks = lazy(() => import('@/components/HowItWorks'))
-const Products = lazy(() => import('@/components/Products'))
-const SocialProof = lazy(() => import('@/components/SocialProof'))
+const Compare = lazy(() => import('@/components/Compare'))
+const Simulator = lazy(() => import('@/components/Simulator'))
+const Market = lazy(() => import('@/components/Market'))
+const Solutions = lazy(() => import('@/components/Solutions'))
+const Security = lazy(() => import('@/components/Security'))
+// Cases fica fora da página até ter os dados reais (src/data/cases.ts)
 const FAQ = lazy(() => import('@/components/FAQ'))
+const TryZordia = lazy(() => import('@/components/TryZordia'))
 const ContactForm = lazy(() => import('@/components/ContactForm'))
 
 function SectionSkeleton() {
-  return (
-    <div className="w-full py-32 flex items-center justify-center">
-      <div className="w-8 h-8 rounded-full border-2 border-brand-neon border-t-transparent animate-spin" />
-    </div>
-  )
+  return <div className="min-h-[60vh] w-full bg-black" />
 }
 
 export default function App() {
   return (
-    <div className="relative min-h-screen bg-black overflow-x-hidden">
+    <div className="relative min-h-screen overflow-x-hidden bg-black">
       <Navbar />
       <main>
         <Hero />
         <Suspense fallback={<SectionSkeleton />}>
           <About />
-        </Suspense>
-        <Suspense fallback={<SectionSkeleton />}>
-          <HowItWorks />
-        </Suspense>
-        <Suspense fallback={<SectionSkeleton />}>
-          <Products />
-        </Suspense>
-        <Suspense fallback={<SectionSkeleton />}>
-          <SocialProof />
-        </Suspense>
-        <Suspense fallback={<SectionSkeleton />}>
+          <Compare />
+          <Simulator />
+          <Market />
+          <Solutions />
+          <Security />
           <FAQ />
-        </Suspense>
-        <Suspense fallback={<SectionSkeleton />}>
+          <TryZordia />
           <ContactForm />
         </Suspense>
       </main>

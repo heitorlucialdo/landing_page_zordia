@@ -1,89 +1,52 @@
-import { useState, useEffect, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { ScrollReveal } from '@/components/animations/ScrollReveal'
+import { useInView } from '@/lib/useInView'
 import { submitLead } from '@/lib/submitLead'
+import { whatsappLink } from '@/lib/contact'
 
 const phoneRegex = /^\(\d{2}\)\s\d{4,5}-\d{4}$/
 
+export const PRODUCTS = [
+  'Ainda não sei',
+  'IA de atendimento e agendamento',
+  'IA de atendimento, agendamento, pré e pós-procedimento',
+  'Solução sob medida',
+] as const
+
+const SPECIALTIES = ['Odontologia', 'Estética', 'Clínica médica', 'Fisioterapia', 'Psicologia', 'Outra área da saúde', 'Outro tipo de empresa'] as const
+
 const contactSchema = z.object({
-  name:     z.string().min(3, 'Nome deve ter pelo menos 3 caracteres'),
-  email:    z.string().email('E-mail inválido'),
-  whatsapp: z.string().regex(phoneRegex, 'Formato: (99) 99999-9999'),
-  needs:    z.string().min(20, 'Descreva com pelo menos 20 caracteres'),
-  products: z.array(z.string()).min(1, 'Selecione pelo menos um produto'),
-  message:  z.string().optional(),
+  intent:    z.enum(['teste-7-dias', 'sob-medida']),
+  name:      z.string().trim().min(3, 'Escreva seu nome'),
+  whatsapp:  z.string().regex(phoneRegex, 'Use o formato (65) 99999-9999'),
+  email:     z.string().trim().email('Escreva um e-mail válido'),
+  clinic:    z.string().trim().min(2, 'Escreva o nome da clínica ou empresa'),
+  specialty: z.enum(SPECIALTIES, { errorMap: () => ({ message: 'Escolha o segmento' }) }),
+  product:   z.enum(PRODUCTS),
 })
 
 export type ContactSchema = z.infer<typeof contactSchema>
 
 function applyPhoneMask(value: string): string {
-  const digits = value.replace(/\D/g, '').slice(0, 11)
-  if (digits.length <= 2)  return `(${digits}`
-  if (digits.length <= 7)  return `(${digits.slice(0, 2)}) ${digits.slice(2)}`
-  if (digits.length <= 11) return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`
-  return value
+  const d = value.replace(/\D/g, '').slice(0, 11)
+  if (d.length === 0) return ''
+  if (d.length <= 2) return `(${d}`
+  if (d.length <= 7) return `(${d.slice(0, 2)}) ${d.slice(2)}`
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`
 }
 
-interface FormFieldProps {
-  label: string
-  error?: string
-  children: ReactNode
-  required?: boolean
-}
-
-function FormField({ label, error, children, required }: FormFieldProps) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-sm text-white/60 font-light tracking-wide">
-        {label}{required && <span className="text-brand-neon ml-1">*</span>}
-      </label>
-      {children}
-      {error && <p className="text-red-400 text-xs mt-0.5">{error}</p>}
-    </div>
-  )
-}
-
-const PRODUCT_OPTIONS = [
-  { value: 'whatsapp-agent',       label: 'Agente IA WhatsApp'           },
-  { value: 'sdr-complete',         label: 'Agente SDR + LP + CRM'        },
-  { value: 'sdr-calls',            label: 'Agente SDR WhatsApp + IA de Ligação' },
-  { value: 'automation-enterprise', label: 'Automação para Empresa'       },
-  { value: 'landing-page',         label: 'Landing Page'                  },
-  { value: 'institutional-site',   label: 'Site Institucional'            },
+const TRIAL_POINTS = [
+  'Uma IA de atendimento simples no WhatsApp da sua clínica',
+  'Ela responde o paciente e passa a conversa pra sua equipe',
+  '7 dias grátis. Gostou, assina o plano. Não gostou, é só parar de usar',
 ]
 
-function InstagramIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-      <circle cx="12" cy="12" r="4"/>
-      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
-    </svg>
-  )
-}
-
-function WhatsAppIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>
-    </svg>
-  )
-}
-
-function EmailIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-      <polyline points="22,6 12,13 2,6"/>
-    </svg>
-  )
-}
-
 export default function ContactForm() {
-  const [submitted, setSubmitted] = useState(false)
+  const [submitted, setSubmitted] = useState<ContactSchema['intent'] | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const { ref, inView } = useInView<HTMLElement>()
 
   const {
     register,
@@ -93,245 +56,220 @@ export default function ContactForm() {
     formState: { errors, isSubmitting },
   } = useForm<ContactSchema>({
     resolver: zodResolver(contactSchema),
-    defaultValues: {
-      name: '', email: '', whatsapp: '', needs: '', products: [], message: '',
-    },
+    defaultValues: { intent: 'teste-7-dias', name: '', whatsapp: '', email: '', clinic: '', specialty: undefined, product: 'Ainda não sei' },
   })
 
-  const selectedProducts = watch('products')
-
-  useEffect(() => {
-    const preselected = sessionStorage.getItem('selectedProduct')
-    if (preselected) {
-      setValue('products', [preselected])
-      sessionStorage.removeItem('selectedProduct')
-    }
-  }, [setValue])
+  const intent = watch('intent')
+  const isTrial = intent === 'teste-7-dias'
 
   async function onSubmit(data: ContactSchema) {
     try {
       setSubmitError(null)
       await submitLead(data)
-      setSubmitted(true)
+      setSubmitted(data.intent)
     } catch {
-      setSubmitError('Erro ao enviar. Tente novamente ou entre em contato pelo WhatsApp.')
+      setSubmitError('Não conseguimos enviar agora. Tente de novo ou fale com a gente no WhatsApp.')
     }
   }
 
   return (
-    <section id="contato" className="section-padding bg-concentric relative">
+    <section id="contato" ref={ref} className="relative overflow-hidden bg-black px-5 py-24 md:px-8 md:py-32">
       <div
-        className="absolute inset-0 pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(39,0,54,0.4) 0%, transparent 60%)' }}
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[70%]"
+        style={{ background: 'radial-gradient(60% 70% at 50% 100%, rgba(124,58,237,0.16), transparent 70%)' }}
+        aria-hidden="true"
       />
 
-      <div className="container-max relative">
-        <ScrollReveal>
-          <span className="inline-block text-xs font-bold text-brand-neon tracking-widest uppercase
-                           border border-brand-neon/30 px-3 py-1.5 rounded-full mb-4">
-            Contato
-          </span>
-          <h2 className="text-3xl md:text-5xl font-black leading-tight">
-            Vamos <span className="text-brand-neon">conversar</span>
-          </h2>
-          <p className="text-white/50 mt-4 max-w-xl">
-            Preencha os dados abaixo e nossa equipe entrará em contato em breve.
+      <div className="relative mx-auto grid max-w-6xl grid-cols-1 gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+        {/* ── Oferta ── */}
+        <div className={`zr-reveal ${inView ? 'is-in' : ''}`}>
+          <p className="mb-5 font-mono text-[11px] uppercase tracking-[0.18em] text-zr-dim">
+            <span className="text-zr-lilac">09</span> — Comece agora
           </p>
-        </ScrollReveal>
+          <h2 className="text-[clamp(2rem,5vw,3.5rem)] font-semibold leading-[1.04] tracking-[-0.03em] text-white">
+            Teste 7 dias na sua clínica.{' '}
+            <span className="text-zr-dim">De graça.</span>
+          </h2>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mt-16">
-          <ScrollReveal delay={0.1}>
+          <ul className="mt-9 flex flex-col gap-4">
+            {TRIAL_POINTS.map((t, i) => (
+              <li key={t} className="flex gap-4">
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-zr-violet/40 bg-zr-violet/10 font-mono text-[11px] text-zr-lilac">
+                  {i + 1}
+                </span>
+                <span className="pt-0.5 text-[16px] leading-snug text-white/80">{t}</span>
+              </li>
+            ))}
+          </ul>
+
+          <p className="mt-9 text-[14px] text-white/40">
+            Prefere conversar antes?{' '}
+            <a
+              href={whatsappLink('Oi! Vim pelo site da ZordIA e quero falar com a equipe.')}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-zr-lilac underline decoration-zr-lilac/30 underline-offset-4 transition-colors hover:decoration-zr-lilac"
+            >
+              Chame a gente no WhatsApp
+            </a>
+            .
+          </p>
+        </div>
+
+        {/* ── Formulário ── */}
+        <div className={`zr-reveal ${inView ? 'is-in' : ''}`} style={{ transitionDelay: '120ms' }}>
+          <div className="rounded-[28px] border border-white/[0.08] bg-zr-surface p-6 sm:p-9">
             {submitted ? (
-              <div className="neon-border rounded-2xl p-12 flex flex-col items-center justify-center text-center h-full"
-                   style={{ background: 'linear-gradient(135deg, rgba(39,0,54,0.3) 0%, transparent 100%)' }}>
-                <div className="w-16 h-16 rounded-full bg-brand-neon/10 border border-brand-neon/40 flex items-center justify-center mb-6">
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#CC00FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-black mb-3">Mensagem enviada!</h3>
-                <p className="text-white/60">Entraremos em contato em breve.</p>
-              </div>
+              <Success intent={submitted} />
             ) : (
-              <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
-                <FormField label="Nome completo" error={errors.name?.message} required>
-                  <input
-                    {...register('name')}
-                    placeholder="Seu nome"
-                    className="input-base"
-                  />
-                </FormField>
+              <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5" noValidate>
+                <fieldset>
+                  <legend className="mb-3 text-[13px] text-white/50">O que você quer?</legend>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <IntentCard
+                      active={isTrial}
+                      onClick={() => setValue('intent', 'teste-7-dias')}
+                      title="Quero o teste grátis"
+                      desc="7 dias com a IA no meu WhatsApp"
+                      badge="Recomendado"
+                    />
+                    <IntentCard
+                      active={!isTrial}
+                      onClick={() => setValue('intent', 'sob-medida')}
+                      title="Quero uma solução sob medida"
+                      desc="Diagnóstico e projeto pra minha clínica ou empresa"
+                    />
+                  </div>
+                  <input type="hidden" {...register('intent')} />
+                </fieldset>
 
-                <FormField label="E-mail" error={errors.email?.message} required>
-                  <input
-                    {...register('email')}
-                    type="email"
-                    placeholder="seu@email.com"
-                    className="input-base"
-                  />
-                </FormField>
+                <Field label="Seu nome" error={errors.name?.message}>
+                  <input {...register('name')} autoComplete="name" placeholder="Maria Oliveira" className="input-zr" />
+                </Field>
 
-                <FormField label="WhatsApp / Telefone" error={errors.whatsapp?.message} required>
-                  <input
-                    {...register('whatsapp')}
-                    placeholder="(99) 99999-9999"
-                    className="input-base"
-                    onChange={(e) => {
-                      const masked = applyPhoneMask(e.target.value)
-                      e.target.value = masked
-                      setValue('whatsapp', masked, { shouldValidate: false })
-                    }}
-                  />
-                </FormField>
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                  <Field label="WhatsApp" error={errors.whatsapp?.message}>
+                    <input
+                      {...register('whatsapp', {
+                        onChange: (e) => {
+                          e.target.value = applyPhoneMask(e.target.value)
+                        },
+                      })}
+                      inputMode="tel"
+                      autoComplete="tel-national"
+                      placeholder="(65) 99999-9999"
+                      className="input-zr"
+                    />
+                  </Field>
+                  <Field label="E-mail" error={errors.email?.message}>
+                    <input {...register('email')} type="email" inputMode="email" autoComplete="email" placeholder="maria@clinica.com.br" className="input-zr" />
+                  </Field>
+                </div>
 
-                <FormField label="O que precisa?" error={errors.needs?.message} required>
-                  <textarea
-                    {...register('needs')}
-                    rows={4}
-                    placeholder="Descreva brevemente o que sua empresa precisa automatizar..."
-                    className="input-base resize-none"
-                  />
-                </FormField>
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                  <Field label="Clínica ou empresa" error={errors.clinic?.message}>
+                    <input {...register('clinic')} autoComplete="organization" placeholder="Clínica Sorriso" className="input-zr" />
+                  </Field>
+                  <Field label="Segmento" error={errors.specialty?.message}>
+                    <select {...register('specialty')} defaultValue="" className="input-zr appearance-none bg-[length:16px] bg-[right_14px_center] bg-no-repeat pr-10"
+                      style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23A1A1AA' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")" }}>
+                      <option value="" disabled>Escolha</option>
+                      {SPECIALTIES.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </Field>
+                </div>
+
+                <Field label="Tem preferência por algum produto?" error={errors.product?.message}>
+                  <select {...register('product')} className="input-zr appearance-none bg-[length:16px] bg-[right_14px_center] bg-no-repeat pr-10"
+                      style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23A1A1AA' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")" }}>
+                    {PRODUCTS.map((p) => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                  </select>
+                </Field>
 
                 {submitError && (
-                  <p className="text-red-400 text-sm border border-red-400/30 bg-red-400/5 rounded-xl px-4 py-3">
-                    {submitError}
-                  </p>
+                  <p className="rounded-xl border border-red-400/30 bg-red-400/5 px-4 py-3 text-[13px] text-red-300">{submitError}</p>
                 )}
-
-                <div className="lg:hidden">
-                  <FormField label="Produtos de interesse" error={errors.products?.message} required>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
-                      {PRODUCT_OPTIONS.map((opt) => {
-                        const checked = selectedProducts.includes(opt.value)
-                        return (
-                          <label
-                            key={opt.value}
-                            className={`flex items-center gap-3 cursor-pointer p-3 rounded-xl border transition-all duration-200
-                              ${checked
-                                ? 'border-brand-neon/60 bg-brand-neon/5'
-                                : 'border-white/10 hover:border-white/20'
-                              }`}
-                          >
-                            <input
-                              type="checkbox"
-                              value={opt.value}
-                              {...register('products')}
-                              className="sr-only"
-                            />
-                            <span
-                              className={`flex-shrink-0 w-4 h-4 rounded border transition-all duration-200 flex items-center justify-center
-                                ${checked ? 'bg-brand-neon border-brand-neon' : 'border-white/30'}`}
-                            >
-                              {checked && (
-                                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                                  <polyline points="1.5 5 4 7.5 8.5 2.5" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                              )}
-                            </span>
-                            <span className="text-sm text-white/80">{opt.label}</span>
-                          </label>
-                        )
-                      })}
-                    </div>
-                  </FormField>
-                </div>
 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-5 bg-brand-neon text-black font-black rounded-xl
-                             hover:shadow-neon-lg transition-all duration-300 text-base tracking-wide
-                             disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="zr-cta mt-1 flex h-14 w-full items-center justify-center gap-2.5 rounded-full text-[15px] font-semibold text-white disabled:cursor-wait disabled:opacity-70"
                 >
                   {isSubmitting ? (
                     <>
-                      <span className="w-4 h-4 rounded-full border-2 border-black border-t-transparent animate-spin" />
-                      Enviando...
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                      Enviando…
                     </>
+                  ) : isTrial ? (
+                    'Quero meu teste grátis'
                   ) : (
-                    'Enviar mensagem →'
+                    'Quero meu diagnóstico'
                   )}
                 </button>
+                <p className="text-center text-[12px] text-white/35">
+                  {isTrial ? 'A ZordIA te chama no WhatsApp pra liberar o teste.' : 'A gente te chama no WhatsApp pra marcar o diagnóstico.'}
+                </p>
               </form>
             )}
-          </ScrollReveal>
-
-          <ScrollReveal delay={0.2}>
-            <div className="flex flex-col gap-8">
-              <div className="hidden lg:block">
-                <FormField label="Produtos de interesse" error={errors.products?.message} required>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
-                    {PRODUCT_OPTIONS.map((opt) => {
-                      const checked = selectedProducts.includes(opt.value)
-                      return (
-                        <label
-                          key={opt.value}
-                          className={`flex items-center gap-3 cursor-pointer p-3 rounded-xl border transition-all duration-200
-                            ${checked
-                              ? 'border-brand-neon/60 bg-brand-neon/5'
-                              : 'border-white/10 hover:border-white/20'
-                            }`}
-                        >
-                          <input
-                            type="checkbox"
-                            value={opt.value}
-                            {...register('products')}
-                            className="sr-only"
-                          />
-                          <span
-                            className={`flex-shrink-0 w-4 h-4 rounded border transition-all duration-200 flex items-center justify-center
-                              ${checked ? 'bg-brand-neon border-brand-neon' : 'border-white/30'}`}
-                          >
-                            {checked && (
-                              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                                <polyline points="1.5 5 4 7.5 8.5 2.5" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                            )}
-                          </span>
-                          <span className="text-sm text-white/80">{opt.label}</span>
-                        </label>
-                      )
-                    })}
-                  </div>
-                </FormField>
-              </div>
-
-              <div
-                className="rounded-2xl p-6 border border-white/10 flex flex-col gap-4"
-                style={{ background: 'rgba(255,255,255,0.02)' }}
-              >
-                <p className="text-xs text-white/30 uppercase tracking-widest font-bold">Fale conosco</p>
-                <a
-                  href="https://instagram.com/ia.zord"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 text-white/70 hover:text-brand-neon transition-colors duration-200 w-fit"
-                >
-                  <InstagramIcon />
-                  <span className="text-sm">@ia.zord</span>
-                </a>
-                <a
-                  href="https://wa.me/5565993383474"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 text-white/70 hover:text-brand-neon transition-colors duration-200 w-fit"
-                >
-                  <WhatsAppIcon />
-                  <span className="text-sm">(65) 99338-3474</span>
-                </a>
-                <a
-                  href="mailto:zord.ia20@gmail.com"
-                  className="flex items-center gap-3 text-white/70 hover:text-brand-neon transition-colors duration-200 w-fit"
-                >
-                  <EmailIcon />
-                  <span className="text-sm">zord.ia20@gmail.com</span>
-                </a>
-              </div>
-            </div>
-          </ScrollReveal>
+          </div>
         </div>
       </div>
     </section>
+  )
+}
+
+function IntentCard({ active, onClick, title, desc, badge }: { active: boolean; onClick: () => void; title: string; desc: string; badge?: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`relative flex flex-col items-start gap-1 rounded-2xl border p-4 text-left transition-all duration-300 ${
+        active
+          ? 'border-zr-lilac/60 bg-zr-violet/[0.12] shadow-[0_10px_40px_-20px_rgba(124,58,237,0.9)]'
+          : 'border-white/[0.08] bg-white/[0.02] hover:border-white/20'
+      }`}
+    >
+      <span className="flex w-full items-center justify-between gap-2">
+        <span className={`grid h-[18px] w-[18px] place-items-center rounded-full border-2 transition-colors ${active ? 'border-zr-lilac' : 'border-white/25'}`}>
+          <span className={`h-2 w-2 rounded-full bg-zr-lilac transition-transform ${active ? 'scale-100' : 'scale-0'}`} />
+        </span>
+        {badge && <span className="rounded-full bg-zr-violet/25 px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-wider text-zr-lilac">{badge}</span>}
+      </span>
+      <span className="mt-2 text-[15px] font-semibold text-white">{title}</span>
+      <span className="text-[13px] text-white/50">{desc}</span>
+    </button>
+  )
+}
+
+function Field({ label, error, children }: { label: string; error?: string; children: ReactNode }) {
+  return (
+    <label className="flex flex-col gap-2">
+      <span className="text-[13px] text-white/50">{label}</span>
+      {children}
+      {error && <span className="text-[12px] text-red-300">{error}</span>}
+    </label>
+  )
+}
+
+function Success({ intent }: { intent: ContactSchema['intent'] }) {
+  return (
+    <div className="flex flex-col items-center py-10 text-center">
+      <span className="grid h-16 w-16 place-items-center rounded-full border border-zr-lilac/40 bg-zr-violet/15">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C4B5FD" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M5 12.5l4.5 4.5L19 7.5" />
+        </svg>
+      </span>
+      <h3 className="mt-6 text-[26px] font-semibold tracking-[-0.02em] text-white">Recebemos!</h3>
+      <p className="mt-3 max-w-sm text-[15px] leading-relaxed text-zr-muted">
+        {intent === 'teste-7-dias'
+          ? 'Fique de olho no WhatsApp: a ZordIA vai te chamar pra liberar seus 7 dias grátis.'
+          : 'Fique de olho no WhatsApp: a nossa equipe vai te chamar pra marcar o diagnóstico.'}
+      </p>
+    </div>
   )
 }

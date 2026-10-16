@@ -54,6 +54,226 @@
     );
   }
 
+  /* ── Hero ZordIA ─────────────────────────────────────── */
+  .zr-grain {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.07;
+    mix-blend-mode: overlay;
+  }
+
+  /* Agenda em perspectiva: o "chão" do hero */
+  .zr-floor {
+    position: absolute;
+    left: 50%;
+    bottom: -8%;
+    width: 180%;
+    height: 78%;
+    transform: translateX(-50%) perspective(900px) rotateX(62deg);
+    transform-origin: 50% 100%;
+    display: grid;
+    gap: 6px;
+    -webkit-mask-image: linear-gradient(to top, #000 10%, transparent 85%);
+            mask-image: linear-gradient(to top, #000 10%, transparent 85%);
+  }
+  .zr-floor > i {
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.035);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+    transition: background-color 1.4s ease, box-shadow 1.4s ease;
+  }
+  .zr-floor > i.on {
+    background: rgba(124, 58, 237, 0.42);
+    box-shadow: inset 0 0 0 1px rgba(167, 139, 250, 0.55), 0 0 24px rgba(124, 58, 237, 0.45);
+  }
+
+  /* Revelação palavra por palavra */
+  .zr-word {
+    display: inline-block;
+    opacity: 0;
+    filter: blur(14px);
+    transform: translateY(0.35em);
+    animation: zr-in 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+  }
+  /* Linha do título revelada por uma barra roxa que varre da esquerda */
+  .zr-scan {
+    position: relative;
+    display: inline-block;
+    padding-right: 0.06em;
+    clip-path: inset(-0.2em 100% -0.2em 0);
+    animation: zr-wipe 0.85s cubic-bezier(0.75, 0, 0.2, 1) forwards;
+  }
+  .zr-scan::after {
+    content: '';
+    position: absolute;
+    top: 6%;
+    bottom: 2%;
+    left: 0;
+    width: 3px;
+    border-radius: 2px;
+    background: #C4B5FD;
+    box-shadow: 0 0 18px 2px rgba(139, 92, 246, 0.9);
+    transform: translateX(-100%);
+    animation: zr-bar 0.85s cubic-bezier(0.75, 0, 0.2, 1) forwards;
+    animation-delay: inherit;
+  }
+  @keyframes zr-wipe { to { clip-path: inset(-0.2em -0.1em -0.2em 0); } }
+  @keyframes zr-bar {
+    0%   { left: 0; opacity: 1; }
+    88%  { opacity: 1; }
+    100% { left: 100%; opacity: 0; }
+  }
+
+  .zr-rise {
+    opacity: 0;
+    transform: translateY(18px);
+    animation: zr-in 1s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+  }
+  .zr-fade { opacity: 0; animation: zr-fade 1.6s ease forwards; }
+
+  @keyframes zr-in   { to { opacity: 1; filter: blur(0); transform: none; } }
+  @keyframes zr-fade { to { opacity: 1; } }
+
+  /* Logo: o Z se desenha */
+  .zr-zpath {
+    stroke-dasharray: 90;
+    stroke-dashoffset: 90;
+    animation: zr-draw 0.9s cubic-bezier(0.6, 0, 0.2, 1) 0.1s forwards;
+  }
+  @keyframes zr-draw { to { stroke-dashoffset: 0; } }
+
+  /* Botão principal com brilho passando */
+  .zr-cta {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, #8B5CF6 0%, #7C3AED 55%, #6D28D9 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.28),
+      0 0 0 1px rgba(167, 139, 250, 0.35),
+      0 10px 40px -8px rgba(124, 58, 237, 0.75);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .zr-cta:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.32),
+      0 0 0 1px rgba(196, 181, 253, 0.5),
+      0 16px 50px -8px rgba(124, 58, 237, 0.95);
+  }
+  .zr-cta::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.35) 50%, transparent 70%);
+    transform: translateX(-120%);
+    animation: zr-shine 4.5s ease-in-out 2.4s infinite;
+  }
+  @keyframes zr-shine { 0%, 70% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
+
+  /* Chat */
+  .zr-msg { animation: zr-msg 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  @keyframes zr-msg {
+    from { opacity: 0; transform: translateY(10px) scale(0.97); filter: blur(4px); }
+    to   { opacity: 1; transform: none; filter: blur(0); }
+  }
+  .zr-dot { animation: zr-dot 1.1s ease-in-out infinite; }
+  .zr-dot:nth-child(2) { animation-delay: 0.15s; }
+  .zr-dot:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes zr-dot { 0%, 100% { opacity: 0.25; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-2px); } }
+
+  .zr-float { animation: zr-float 7s ease-in-out infinite; }
+  @keyframes zr-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+  .zr-pulse { animation: zr-pulse 2.4s ease-out infinite; }
+  @keyframes zr-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(167, 139, 250, 0.6); }
+    100% { box-shadow: 0 0 0 10px rgba(167, 139, 250, 0); }
+  }
+
+  /* Aparecer ao rolar */
+  .zr-reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.9s cubic-bezier(0.2, 0.7, 0.2, 1), filter 0.9s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .zr-reveal.is-in { opacity: 1; filter: none; transform: none; }
+
+  /* Faixa listrada (horário em que o paciente faltou) */
+  .zr-stripes {
+    background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.09) 0 2px, transparent 2px 6px);
+  }
+
+  /* Slider do simulador */
+  .zr-range {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 28px;
+    background: transparent;
+    cursor: pointer;
+    --p: 50%;
+  }
+  .zr-range:focus { outline: none; }
+  .zr-range::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 999px;
+    background: linear-gradient(to right, #8B5CF6 0 var(--p), rgba(255,255,255,0.1) var(--p) 100%);
+  }
+  .zr-range::-moz-range-track {
+    height: 4px;
+    border-radius: 999px;
+    background: linear-gradient(to right, #8B5CF6 0 var(--p), rgba(255,255,255,0.1) var(--p) 100%);
+  }
+  .zr-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    margin-top: -9px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 0 6px rgba(124, 58, 237, 0.25), 0 4px 14px rgba(0, 0, 0, 0.5);
+    transition: box-shadow 0.2s ease;
+  }
+  .zr-range::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 0 6px rgba(124, 58, 237, 0.25), 0 4px 14px rgba(0, 0, 0, 0.5);
+  }
+  .zr-range:hover::-webkit-slider-thumb,
+  .zr-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 9px rgba(124, 58, 237, 0.35), 0 4px 14px rgba(0, 0, 0, 0.5); }
+
+  /* Quem já viu a entrada, ou pediu menos movimento, vê tudo pronto */
+  .zr-static .zr-scan { animation: none; clip-path: none; }
+  .zr-static .zr-scan::after { display: none; }
+  .zr-static .zr-word,
+  .zr-static .zr-rise,
+  .zr-static .zr-fade {
+    animation: none;
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+  .zr-static .zr-zpath { animation: none; stroke-dashoffset: 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .zr-word, .zr-rise, .zr-fade, .zr-msg { animation: none; opacity: 1; filter: none; transform: none; }
+    .zr-scan { animation: none; clip-path: none; }
+    .zr-scan::after { display: none; }
+    .zr-zpath { animation: none; stroke-dashoffset: 0; }
+    .zr-cta::after, .zr-float, .zr-pulse, .zr-dot { animation: none; }
+    .zr-floor > i { transition: none; }
+    .zr-reveal { opacity: 1; filter: none; transform: none; transition: none; }
+  }
+
+  .input-zr {
+    @apply h-[52px] w-full rounded-2xl border border-white/[0.08] bg-white/[0.03] px-4 text-[15px] text-white
+           outline-none transition-all duration-200 placeholder:text-white/25
+           hover:border-white/15 focus:border-zr-lilac/60 focus:bg-zr-violet/[0.06];
+  }
+  .input-zr option { background: #0E0E11; color: #fff; }
+
   .input-base {
     @apply w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3
            text-white placeholder:text-white/30 outline-none

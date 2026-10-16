@@ -17,10 +17,21 @@ const config: Config = {
           'neon-30': 'rgba(204,0,255,0.30)',
           'neon-60': 'rgba(204,0,255,0.60)',
         },
+        zr: {
+          bg:        '#050506',
+          surface:   '#0E0E11',
+          raised:    '#16161A',
+          line:      'rgba(255,255,255,0.08)',
+          violet:    '#7C3AED',
+          'violet-hi': '#8B5CF6',
+          lilac:     '#A78BFA',
+          muted:     '#A1A1AA',
+          dim:       '#5E5E68',
+        },
       },
       fontFamily: {
-        sans: ['Raleway', 'sans-serif'],
-        mono: ['"JetBrains Mono"', 'monospace'],
+        sans: ['"Instrument Sans"', 'system-ui', 'sans-serif'],
+        mono: ['"Geist Mono"', '"JetBrains Mono"', 'monospace'],
       },
       boxShadow: {
         neon:      '0 0 20px rgba(204,0,255,0.3)',

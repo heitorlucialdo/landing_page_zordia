@@ -1,14 +1,28 @@
 import { supabase } from '@/lib/supabase'
 import type { ContactSchema } from '@/components/ContactForm'
 
+export const INTENT_LABEL: Record<ContactSchema['intent'], string> = {
+  'teste-7-dias': 'Teste grátis de 7 dias',
+  'sob-medida': 'Solução sob medida',
+}
+
 export async function submitLead(data: ContactSchema): Promise<void> {
+  // A tabela leadslp continua com as mesmas colunas: o que é novo
+  // (clínica, especialidade e intenção) vai em `needs` e `products`.
+  const needs = [
+    `Interesse: ${INTENT_LABEL[data.intent]}`,
+    `Clínica: ${data.clinic}`,
+    `Segmento: ${data.specialty}`,
+    `Produto: ${data.product}`,
+  ].join(' · ')
+
   const { error } = await supabase.from('leadslp').insert({
     name:     data.name,
     email:    data.email,
     whatsapp: data.whatsapp,
-    needs:    data.needs,
-    products: data.products,
-    message:  data.message ?? null,
+    needs,
+    products: [data.intent, data.product],
+    message:  null,
   })
 
   if (error) {
@@ -24,11 +38,14 @@ export async function submitLead(data: ContactSchema): Promise<void> {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name:      data.name,
-          email:     data.email,
           whatsapp:  data.whatsapp,
-          needs:     data.needs,
-          products:  data.products,
-          message:   data.message ?? '',
+          email:     data.email,
+          intent:    data.intent,
+          product:   data.product,
+          clinic:    data.clinic,
+          specialty: data.specialty,
+          needs,
+          products:  [data.intent, data.product],
           timestamp: new Date().toISOString(),
         }),
       })
